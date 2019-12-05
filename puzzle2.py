@@ -1,16 +1,32 @@
+from itertools import permutations
+
+def execute(mem, noun, verb):
+    # Initialize copy of memory
+    mem = list(mem)
+    mem[1], mem[2] = noun, verb
+
+    # Execute program
+    instructionPtr = 0
+    for ip in range(0, len(mem), 4):  # ip = instruction pointer
+        opcode = mem[ip]
+        if opcode == 1:  # Add
+            mem[mem[ip+3]] = mem[mem[ip+1]] + mem[mem[ip+2]]
+            #log(codes)
+        elif opcode == 2:  # Mult     
+            mem[mem[ip+3]] = mem[mem[ip+1]] * mem[mem[ip+2]]
+            #log(codes)
+        elif opcode == 99:  # Terminate
+            #log(codes)
+            return mem[0]
+
+
 def solve_part_1(puzzle_input: str):
-    codes = [ int(val) for val in puzzle_input.split(',') ]
-    codes[1], codes[2] = 12, 2
-    i = 0
-    while i < len(codes):
-        op = codes[i]
-        if op == 1:  # Add
-            codes[codes[i+3]] = codes[codes[i+1]] + codes[codes[i+2]]
-            #log(codes)
-        elif op == 2:  # Mult     
-            codes[codes[i+3]] = codes[codes[i+1]] * codes[codes[i+2]]
-            #log(codes)
-        elif op == 99:  # Terminate
-            #log(codes)
-            return codes[0]
-        i += 4
+    memory = tuple( map(int, puzzle_input.split(',')) )
+    return execute(memory, 12, 2)
+
+def solve_part_2(puzzle_input: str):
+    memory = tuple( map(int, puzzle_input.split(',')) )
+    for noun, verb in permutations(tuple(range(0, 100)), 2):
+        result = execute(memory, noun, verb)
+        if result == 19690720:
+            return 100 * noun + verb
