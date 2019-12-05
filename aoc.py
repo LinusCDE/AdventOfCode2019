@@ -30,11 +30,11 @@ def time_str(millis, precision=3):
     return string
 
 
-def log(message):
+def log(*args, **kwargs):
     '''If verbose is active the message will get printed.
     This function gets injected into every puzzle<Day>-Module automatically.'''
     if verbose:
-        print(message, file=stderr)
+        print(*args, **kwargs, file=stderr)
 
 
 if __name__ == '__main__':  # Main part
