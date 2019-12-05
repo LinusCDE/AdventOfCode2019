@@ -8,12 +8,14 @@ def distance(pos1: tuple, pos2: tuple):
     y_dist = pos1[1] - pos2[1] if pos1[1] > pos2[1] else pos2[1] - pos1[1]
     return x_dist + y_dist
 
+
 DIRECTIONS = {
     'U': ( 0,  1),  # Up
     'D': ( 0, -1),  # Down
     'L': (-1,  0),  # Left
     'R': ( 1,  0),  # Right
 }
+
 
 def solve_part_1(puzzle_input: str):
     field = CoordinateField()
@@ -40,7 +42,48 @@ def solve_part_1(puzzle_input: str):
             # only yield positions with two different wires crossing.
             # More don't seem to count.
             dist = distance((0,0), (x,y))
-            log(x,y,value,dist)
+            #log(x,y,value,dist)
             if closestDist is None or dist < closestDist:
                 closestDist = dist
     return closestDist
+
+
+NO_CABLE = -2
+TOO_MANY_CABLES = -1
+
+def solve_part_2(puzzle_input: str):
+    field = CoordinateField()
+    
+    wireNum = 0
+    for wire in puzzle_input.split('\n'):
+        wireNum += 1
+        pos = (0, 0)
+        length = 0
+        for instruction in wire.split(','):
+            directionVector = DIRECTIONS[instruction[0]]
+            count = int(instruction[1:])
+            for _ in range(count):
+                length += 1
+                pos = add(pos, directionVector)
+                data = field.get(pos, default=[NO_CABLE,NO_CABLE])
+                if data[wireNum-1] != NO_CABLE or data[wireNum-1] == TOO_MANY_CABLES:
+                    data[wireNum-1] = TOO_MANY_CABLES
+                else:
+                    data[wireNum-1] = length
+                field[pos] = data
+
+    # Every coordinate has a list with two elements.
+    # Either length, NO_CABLE or TOO_MANY_CABLES (of same type)
+
+    closestCableDist = None
+    for x, y, data in field.items():
+        if data[0] >= 0 and data[1] >= 0 and not (x == 0 and y == 0):
+            # Using value of 3 will most likely (not guaranteed)
+            # only yield positions with two different wires crossing.
+            # More don't seem to count.
+            #dist = distance((0,0), (x,y))
+            cableDist = data[0] + data[1]
+            #log(x,y,value,dist)
+            if closestCableDist is None or cableDist < closestCableDist:
+                closestCableDist = cableDist
+    return closestCableDist
