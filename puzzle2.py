@@ -18,6 +18,7 @@ class OperationInfo:
         fullOpInfo = str(memory[opCodeIndex]).zfill(2 + parameterCount)
         self.opcode = int(fullOpInfo[-2:]) # Last two chars as int
         self.modes = [ int(mode) for mode in fullOpInfo[:-2][::-1] ]
+        self.postExecutionCustomIp = None
 
     def __getitem__(self, parameterIndex: int):
         mode = self.modes[parameterIndex]
@@ -61,11 +62,6 @@ def Routine(opcode: int, parameterCount: int):
                 'parameterCount': parameterCount,
                 'run': lambda *args, **kwargs: func(*args, **kwargs)
                 })
-            #class Routine(IntcodeRoutineClass):
-            #    opcode=opcode
-            #    parameters=parameters
-            #    def run(self, *args, **kwargs):
-            #        return func(*args, **kwargs)
             return routineClass
         return wrapper
     return decorator
@@ -98,8 +94,13 @@ class IntcodeComputer:
                 return mem[0]
             else:
                 routine = self.routines[int(str(opcode).zfill(2)[-2:])]
-                routine.run(OperationInfo(self, mem, ip, routine.parameterCount))
-                ip += 1 + routine.parameterCount
+                opi = OperationInfo(self, mem, ip, routine.parameterCount)
+                routine.run(opi)
+                
+                if opi.postExecutionCustomIp is not None:
+                    ip = opi.postExecutionCustomIp
+                else:
+                    ip += 1 + routine.parameterCount
 
 
 @Routine(opcode=1, parameterCount=3)
